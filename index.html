@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حاسبة المعدل السنوي (حسب المادة)</title>
+    <title>حاسبة المعدل السنوي (نسخة مصححة)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,13 +20,6 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
-        .grade-input:disabled {
-            background-color: #f3f4f6;
-            cursor: not-allowed;
-        }
-        .dark .grade-input:disabled {
-            background-color: #374151;
-        }
         .final-grade {
             transition: color 0.3s, transform 0.3s;
         }
@@ -37,7 +30,7 @@
         
         <header class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-800 dark:text-white">حاسبة المعدل السنوي المفصّلة</h1>
-            <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">أدخل علاماتك ليتم حساب معدل كل مادة والمعدل العام تلقائيًا.</p>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">تُعامل الخانات الفارغة كعلامة صفر في الحساب.</p>
         </header>
 
         <section class="mb-8 text-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
@@ -65,6 +58,21 @@
             </div>
         </main>
         
+        <footer class="mt-12 text-center">
+            <div class="max-w-3xl mx-auto p-6 bg-white/50 dark:bg-gray-800/50 rounded-xl shadow-inner relative border border-gray-200 dark:border-gray-700">
+                 <svg class="absolute top-0 right-0 h-8 w-8 -mt-2 -mr-2 text-gray-300 dark:text-gray-600" fill="currentColor" viewBox="0 0 32 32" aria-hidden="true">
+                    <path d="M9.333 8h-2.667c-1.473 0-2.667 1.193-2.667 2.667v8c0 1.473 1.194 2.667 2.667 2.667h2.667v-8c0-1.473-1.193-2.667-2.667-2.667zM25.333 8h-2.667c-1.473 0-2.667 1.193-2.667 2.667v8c0 1.473 1.194 2.667 2.667 2.667h2.667v-8c0-1.473-1.193-2.667-2.667-2.667z" />
+                </svg>
+                <blockquote class="text-lg italic text-gray-600 dark:text-gray-300">
+                    <p>"عمرك لترمي القزاز في طريق الرجالة، يجي النهار لي تقصدهم حفيان..."</p>
+                    <p class="mt-2 text-base not-italic font-bold text-gray-700 dark:text-gray-200">"اضرب ينعل بو لي بكاهم، وتاتاتاتاتا"</p>
+                </blockquote>
+                <svg class="absolute bottom-0 left-0 h-8 w-8 -mb-2 -ml-2 text-gray-300 dark:text-gray-600 transform rotate-180" fill="currentColor" viewBox="0 0 32 32" aria-hidden="true">
+                    <path d="M9.333 8h-2.667c-1.473 0-2.667 1.193-2.667 2.667v8c0 1.473 1.194 2.667 2.667 2.667h2.667v-8c0-1.473-1.193-2.667-2.667-2.667zM25.333 8h-2.667c-1.473 0-2.667 1.193-2.667 2.667v8c0 1.473 1.194 2.667 2.667 2.667h2.667v-8c0-1.473-1.193-2.667-2.667-2.667z" />
+                </svg>
+            </div>
+        </footer>
+
     </div>
 
     <script>
@@ -82,21 +90,23 @@
             { id: 'physiologie', name: 'Physiologie', coeff: 1, s1: false, s2: true, tp: false },
         ];
 
+        // Calculate the total coefficients for the entire year once.
+        const TOTAL_COEFFICIENTS = subjectsData.reduce((sum, subject) => sum + subject.coeff, 0);
+
         const tableBody = document.getElementById('subjects-table-body');
         const finalAverageDisplay = document.getElementById('finalAverageDisplay');
 
         const createGradeInput = (subjectId, gradeType, isEnabled) => {
             if (!isEnabled) {
-                return `<input type="number" class="w-20 grade-input bg-gray-200 dark:bg-gray-600" disabled>`;
+                return `<div class="w-20 h-11 bg-gray-200 dark:bg-gray-600 rounded-lg inline-block align-middle"></div>`;
             }
             return `<input type="number" data-subject-id="${subjectId}" data-grade-type="${gradeType}" 
                            placeholder="--" step="0.25" min="0" max="20"
-                           class="w-20 grade-input bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 text-center rounded-lg focus:ring-2 focus:ring-blue-500 p-2 transition">`;
+                           class="w-20 h-11 grade-input bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 text-center rounded-lg focus:ring-2 focus:ring-blue-500 p-2 transition">`;
         };
         
         const calculateAndUpdate = () => {
             let totalPoints = 0;
-            let totalCoeffs = 0;
 
             subjectsData.forEach(subject => {
                 const row = document.getElementById(`row-${subject.id}`);
@@ -104,64 +114,58 @@
                 const s2Input = row.querySelector(`[data-grade-type="s2"]`);
                 const tpInput = row.querySelector(`[data-grade-type="tp"]`);
 
-                const s1 = s1Input && !s1Input.disabled ? parseFloat(s1Input.value) : NaN;
-                const s2 = s2Input && !s2Input.disabled ? parseFloat(s2Input.value) : NaN;
-                const tp = tpInput && !tpInput.disabled ? parseFloat(tpInput.value) : NaN;
+                // Helper to parse grade, returning 0 if invalid/empty/out of range
+                const parseGrade = (input) => {
+                    if (!input) return 0;
+                    const val = parseFloat(input.value);
+                    return (isNaN(val) || val < 0 || val > 20) ? 0 : val;
+                };
+                
+                const s1 = parseGrade(s1Input);
+                const s2 = parseGrade(s2Input);
+                const tp = parseGrade(tpInput);
 
                 let subjectAverage = 0;
-                let isCalculable = false;
-                
-                if (subject.tp) { // For subjects with TP
-                    if (!isNaN(s1) && !isNaN(s2) && !isNaN(tp)) {
-                        const theoryAvg = (s1 + s2) / 2;
-                        subjectAverage = (theoryAvg * 2 + tp * 1) / 3;
-                        isCalculable = true;
-                    }
-                } else if (subject.s1 && subject.s2) { // For subjects in both semesters
-                    if (!isNaN(s1) && !isNaN(s2)) {
-                        subjectAverage = (s1 + s2) / 2;
-                        isCalculable = true;
-                    }
-                } else if (subject.s1) { // For S1-only subjects
-                    if (!isNaN(s1)) {
-                        subjectAverage = s1;
-                        isCalculable = true;
-                    }
-                } else if (subject.s2) { // For S2-only subjects
-                    if (!isNaN(s2)) {
-                        subjectAverage = s2;
-                        isCalculable = true;
-                    }
+
+                if (subject.tp) {
+                    const theoryAvg = (s1 + s2) / 2;
+                    subjectAverage = (theoryAvg * 2 + tp * 1) / 3;
+                } else if (subject.s1 && subject.s2) {
+                    subjectAverage = (s1 + s2) / 2;
+                } else if (subject.s1) {
+                    subjectAverage = s1;
+                } else if (subject.s2) {
+                    subjectAverage = s2;
                 }
 
+                totalPoints += subjectAverage * subject.coeff;
+                
                 const subjectAvgDisplay = row.querySelector('.subject-average');
-                if(isCalculable) {
-                    subjectAvgDisplay.textContent = subjectAverage.toFixed(2);
+                subjectAvgDisplay.textContent = subjectAverage.toFixed(2);
+                
+                if(subjectAverage > 0) {
                     subjectAvgDisplay.classList.add('text-blue-600', 'dark:text-blue-400', 'font-bold');
-                    totalPoints += subjectAverage * subject.coeff;
-                    totalCoeffs += subject.coeff;
                 } else {
-                    subjectAvgDisplay.textContent = '0.00';
                     subjectAvgDisplay.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-bold');
                 }
             });
             
-            const finalAverage = totalCoeffs > 0 ? (totalPoints / totalCoeffs) : 0;
+            const finalAverage = TOTAL_COEFFICIENTS > 0 ? (totalPoints / TOTAL_COEFFICIENTS) : 0;
             finalAverageDisplay.textContent = finalAverage.toFixed(2);
         };
         
         subjectsData.forEach(subject => {
             const row = document.createElement('tr');
             row.id = `row-${subject.id}`;
-            row.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700';
+            row.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 align-middle';
 
             row.innerHTML = `
                 <td class="px-4 py-4 font-medium whitespace-nowrap text-right">${subject.name}</td>
                 <td class="px-4 py-4">${createGradeInput(subject.id, 's1', subject.s1)}</td>
                 <td class="px-4 py-4">${createGradeInput(subject.id, 's2', subject.s2)}</td>
                 <td class="px-4 py-4">${createGradeInput(subject.id, 'tp', subject.tp)}</td>
-                <td class="px-4 py-4 font-bold text-gray-800 dark:text-gray-200">${subject.coeff}</td>
-                <td class="px-4 py-4 subject-average final-grade">0.00</td>
+                <td class="px-4 py-4 font-bold text-gray-800 dark:text-gray-200 text-lg">${subject.coeff}</td>
+                <td class="px-4 py-4 subject-average final-grade text-lg">0.00</td>
             `;
             tableBody.appendChild(row);
         });
@@ -169,6 +173,9 @@
         document.querySelectorAll('.grade-input').forEach(input => {
             input.addEventListener('input', calculateAndUpdate);
         });
+
+        // Initial calculation on page load
+        calculateAndUpdate();
     });
     </script>
 </body>
