@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حاسبة المعدل السنوي</title>
+    <title>حاسبة المعدل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,10 +29,10 @@
     <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
         
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 dark:text-white">حاسبة المعدل السنوي</h1> 
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white"> حاسبة المعدل السنوي </h1>
         </header>
 
-        <!-- Quote Section (Moved to top) -->
+        <!-- Quote Section -->
         <section class="mb-10 text-center">
             <div class="max-w-3xl mx-auto p-6 bg-white/50 dark:bg-gray-800/50 rounded-xl shadow-inner relative border border-gray-200 dark:border-gray-700">
                  <svg class="absolute top-0 right-0 h-8 w-8 -mt-2 -mr-2 text-gray-300 dark:text-gray-600" fill="currentColor" viewBox="0 0 32 32" aria-hidden="true">
@@ -68,7 +68,7 @@
             </div>
         </main>
         
-        <!-- Final Average Display (Moved to bottom) -->
+        <!-- Final Average Display -->
         <section class="mt-10 text-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
             <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">المعدل العام السنوي</p>
             <p id="finalAverageDisplay" class="text-6xl font-extrabold text-green-600 dark:text-green-400 transition-colors duration-300">0.00</p>
@@ -129,8 +129,9 @@
                 let subjectAverage = 0;
 
                 if (subject.tp) {
+                    // ** NEW CALCULATION LOGIC: 80% Theory, 20% TP **
                     const theoryAvg = (s1 + s2) / 2;
-                    subjectAverage = (theoryAvg * 2 + tp * 1) / 3;
+                    subjectAverage = (theoryAvg * 0.8) + (tp * 0.2);
                 } else if (subject.s1 && subject.s2) {
                     subjectAverage = (s1 + s2) / 2;
                 } else if (subject.s1) {
